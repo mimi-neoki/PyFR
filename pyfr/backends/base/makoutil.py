@@ -22,7 +22,7 @@ def npdtype_to_ctype(context, dtype):
 
 
 def dot(context, a_, b_=None, /, **kwargs):
-    ix, nd = next(iter(kwargs.items()))
+    ix, nd = util.first(kwargs.items())
     ab = '({})*({})'.format(a_, b_ or a_)
 
     # Allow for flexible range arguments
@@ -32,7 +32,7 @@ def dot(context, a_, b_=None, /, **kwargs):
 
 
 def array(context, expr_, vals_={}, /, **kwargs):
-    ix = next(iter(kwargs))
+    ix = util.first(kwargs)
     ni = kwargs.pop(ix)
     items = []
 
@@ -98,6 +98,11 @@ def macro(context, name, params, externs=''):
     params = [p.strip() for p in params.split(',')]
     externs = [e.strip() for e in externs.split(',')] if externs else []
 
+    # Ensure no invalid characters in params/extern variables
+    for p in it.chain(params, externs):
+        if not re.match(r'[A-Za-z_]\w*$', p):
+            raise ValueError(f'Invalid param "{p}" in macro "{name}"')
+
     # Capture the function body
     body = capture(context, context['caller'].body)
 
@@ -117,6 +122,10 @@ def macro(context, name, params, externs=''):
 def expand(context, name, /, *args, **kwargs):
     # Get the macro parameter list and the body
     mparams, mexterns, body = context['_macros'][name]
+
+    # Ensure an appropriate number of arguments have been passed
+    if len(mparams) != len(args) + len(kwargs):
+        raise ValueError(f'Inconsistent macro parameter list in {name}')
 
     # Parse the parameter list
     params = dict(zip(mparams, args))
