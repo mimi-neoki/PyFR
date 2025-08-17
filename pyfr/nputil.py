@@ -62,7 +62,8 @@ _npeval_syms = {
     'abs': np.abs, 'pow': np.power, 'sqrt': np.sqrt,
     'tanh': np.tanh, 'pi': np.pi,
     'max': np.maximum, 'min': np.minimum,
-    'ceil': np.ceil, 'floor': np.floor
+    'ceil': np.ceil, 'floor': np.floor,
+    'mod': np.mod
 }
 
 
